@@ -1,3 +1,6 @@
 import { combineReducers } from 'redux';
+import { bankListReducer } from './bankReducers';
 
-export default combineReducers({});
+export default combineReducers({
+  bankList: bankListReducer,
+});

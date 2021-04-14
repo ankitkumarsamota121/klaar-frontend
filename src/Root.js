@@ -5,9 +5,20 @@ import { composeWithDevTools } from 'redux-devtools-extension';
 
 import reducers from './reducers';
 
+const banksFromStorage = localStorage.getItem('banks')
+  ? JSON.parse(localStorage.getItem('banks'))
+  : {};
+
+const initialState = {
+  banks: banksFromStorage,
+};
 const middlewares = [thunk];
 
-const store = createStore(reducers, composeWithDevTools(applyMiddleware(...middlewares)));
+const store = createStore(
+  reducers,
+  initialState,
+  composeWithDevTools(applyMiddleware(...middlewares))
+);
 
 const Root = ({ children }) => {
   return <Provider store={store}>{children}</Provider>;

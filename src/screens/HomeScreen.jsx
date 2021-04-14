@@ -1,10 +1,31 @@
 import React, { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { listBanks } from '../actions/bankActions';
 import { Form, Row, Col, InputGroup, Table } from 'react-bootstrap';
+import Loader from '../components/Loader';
+import Message from '../components/Message';
+const cities = ['Select City', 'Bangalore', 'Mumbai', 'Kolkata', 'Jaipur', 'Delhi'];
 
-const cities = ['Bangalore', 'Mumbai', 'Kolkata', 'Jaipur', 'Delhi'];
+const citiesMap = {
+  'Select City': '',
+  Bangalore: 'BANGALORE',
+  Mumbai: 'MUMBAI',
+  Kolkata: 'KOLKATA',
+  Jaipur: 'JAIPUR',
+  Delhi: 'DELHI',
+};
 
 const HomeScreen = () => {
   const [city, setCity] = useState('');
+
+  const dispatch = useDispatch();
+  const bankList = useSelector((state) => state.bankList);
+  const { loading, error, banks } = bankList;
+
+  useEffect(() => {
+    dispatch(listBanks(citiesMap[city]));
+  }, [dispatch, city]);
+
   return (
     <>
       <Row>
@@ -30,29 +51,34 @@ const HomeScreen = () => {
       <Table bordered hover>
         <thead>
           <tr>
-            <th>#</th>
+            <th>IFSC</th>
             <th>Bank Name</th>
-            <th>Last Name</th>
+            <th>Branch Name</th>
+            <th>City</th>
             <th></th>
           </tr>
         </thead>
+        {/* Table Body gets filled here */}
         <tbody>
-          <tr>
-            <td>1</td>
-            <td>Mark</td>
-            <td>Otto</td>
-            <td>
-              <i class='far fa-star'></i>
-            </td>
-          </tr>
-          <tr>
-            <td>2</td>
-            <td>Jacob</td>
-            <td>Thornton</td>
-            <td>
-              <i class='far fa-star'></i>
-            </td>
-          </tr>
+          {loading ? (
+            <Loader />
+          ) : error ? (
+            <Message variant='danger'>{error}</Message>
+          ) : (
+            <>
+              {banks.map((bank) => (
+                <tr>
+                  <td>{bank.ifsc}</td>
+                  <td>{bank.bank_name}</td>
+                  <td>{bank.branch}</td>
+                  <td>{bank.city}</td>
+                  <td>
+                    <i class='far fa-star'></i>
+                  </td>
+                </tr>
+              ))}
+            </>
+          )}
         </tbody>
       </Table>
     </>
