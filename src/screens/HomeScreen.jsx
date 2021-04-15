@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { listBanks } from '../actions/bankActions';
-import { Form, Row, Col, InputGroup, Table, Pagination } from 'react-bootstrap';
+import { Form, Row, Col, InputGroup, Table } from 'react-bootstrap';
 import Loader from '../components/Loader';
 import Message from '../components/Message';
+import PaginationComp from '../components/Pagination';
 const cities = ['Select City', 'Bangalore', 'Mumbai', 'Kolkata', 'Jaipur', 'Delhi'];
+const sizes = [10, 50, 100, 200, 500];
 
 const citiesMap = {
   'Select City': '',
@@ -18,6 +20,9 @@ const citiesMap = {
 const HomeScreen = () => {
   const [city, setCity] = useState('');
   const [numPages, setNumPages] = useState(1);
+  const [currPage, setCurrPage] = useState(1);
+  const [pageSize, setPageSize] = useState(100);
+  const [currBankList, setCurrBankList] = useState([]);
 
   const dispatch = useDispatch();
   const bankList = useSelector((state) => state.bankList);
@@ -25,13 +30,23 @@ const HomeScreen = () => {
 
   useEffect(() => {
     dispatch(listBanks(citiesMap[city]));
+    setCurrPage(1);
   }, [dispatch, city]);
 
   useEffect(() => {
     if (banks) {
-      setNumPages(Math.ceil(banks.length / 100));
+      setNumPages(Math.ceil(banks.length / pageSize));
+      const lastIndex = currPage * pageSize;
+      const firstIndex = (currPage - 1) * pageSize;
+      setCurrBankList(banks.slice(firstIndex, lastIndex));
     }
-  }, [banks]);
+  }, [banks, currPage, pageSize]);
+
+  useEffect(() => {
+    setCurrPage(1);
+  }, [numPages]);
+
+  const paginate = (pageNumber) => setCurrPage(pageNumber);
 
   return (
     <>
@@ -73,10 +88,12 @@ const HomeScreen = () => {
             <Message variant='danger'>{error}</Message>
           ) : (
             <>
-              {banks.map((bank) => (
+              {currBankList.map((bank) => (
                 <tr key={bank.ifsc}>
                   <td>{bank.ifsc}</td>
-                  <td>{bank.bank_name}</td>
+                  <td style={{ cursor: 'pointer' }}>
+                    <a href='!#'>{bank.bank_name}</a>
+                  </td>
                   <td>{bank.branch}</td>
                   <td>{bank.city}</td>
                   <td>
@@ -91,23 +108,26 @@ const HomeScreen = () => {
 
       {numPages > 1 && (
         <Row>
-          <Pagination>
-            <Pagination.First />
-            <Pagination.Prev />
-            <Pagination.Item>{1}</Pagination.Item>
-            <Pagination.Ellipsis />
-
-            <Pagination.Item>{10}</Pagination.Item>
-            <Pagination.Item>{11}</Pagination.Item>
-            <Pagination.Item active>{12}</Pagination.Item>
-            <Pagination.Item>{13}</Pagination.Item>
-            <Pagination.Item disabled>{14}</Pagination.Item>
-
-            <Pagination.Ellipsis />
-            <Pagination.Item>{20}</Pagination.Item>
-            <Pagination.Next />
-            <Pagination.Last />
-          </Pagination>
+          <Col sm={9}>
+            <PaginationComp currPage={currPage} totalPages={numPages} paginate={paginate} />
+          </Col>
+          <Col sm={3}>
+            <Row className='align-items-center'>
+              <Col sm='auto'>Page Size: </Col>
+              <Col>
+                <Form.Control
+                  className='pr-1'
+                  as='select'
+                  value={pageSize}
+                  onChange={(e) => setPageSize(e.target.value)}
+                >
+                  {sizes.map((c) => (
+                    <option key={c}>{c}</option>
+                  ))}
+                </Form.Control>
+              </Col>
+            </Row>
+          </Col>
         </Row>
       )}
     </>
