@@ -9,8 +9,13 @@ const banksFromStorage = localStorage.getItem('banks')
   ? JSON.parse(localStorage.getItem('banks'))
   : {};
 
+const favouritesFromStorate = localStorage.getItem('favourites')
+  ? JSON.parse(localStorage.getItem('favourites'))
+  : [];
+
 const initialState = {
   banks: banksFromStorage,
+  favourites: favouritesFromStorate,
 };
 const middlewares = [thunk];
 

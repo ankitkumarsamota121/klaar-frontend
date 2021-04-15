@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+
 import { listBanks } from '../actions/bankActions';
-import { Form, Row, Col, InputGroup, Table } from 'react-bootstrap';
+import { addFavourite, removeFavourite } from '../actions/userActions';
+
+import { Form, Row, Col, InputGroup, Table, Button } from 'react-bootstrap';
 import Loader from '../components/Loader';
 import Message from '../components/Message';
 import PaginationComp from '../components/Pagination';
@@ -24,9 +27,13 @@ const HomeScreen = () => {
   const [pageSize, setPageSize] = useState(100);
   const [currBankList, setCurrBankList] = useState([]);
 
+  const [fav, setFav] = useState(true);
+
   const dispatch = useDispatch();
   const bankList = useSelector((state) => state.bankList);
   const { loading, error, banks } = bankList;
+
+  const favourites = useSelector((state) => state.favourites);
 
   useEffect(() => {
     dispatch(listBanks(citiesMap[city]));
@@ -48,9 +55,17 @@ const HomeScreen = () => {
 
   const paginate = (pageNumber) => setCurrPage(pageNumber);
 
+  const favMethod = (ifsc) => {
+    if (favourites.includes(ifsc)) {
+      dispatch(removeFavourite(ifsc));
+    } else {
+      dispatch(addFavourite(ifsc));
+    }
+  };
+
   return (
     <>
-      <Row>
+      <Row className='align-items-center mb-3'>
         <Col md={4}>
           <Form.Control
             className='pr-1'
@@ -64,10 +79,20 @@ const HomeScreen = () => {
             ))}
           </Form.Control>
         </Col>
-        <Col md={8}>
-          <InputGroup className='mb-3'>
+        <Col md={6}>
+          <InputGroup>
             <Form.Control aria-label='Search' placeholder='Search...' />
           </InputGroup>
+        </Col>
+        <Col md={2}>
+          <Button
+            variant={fav ? 'dark' : 'outline-dark'}
+            onClick={() => setFav(!fav)}
+            className='favourites-btn'
+          >
+            Favourites{'   '}
+            {fav ? <i className='fas fa-star'></i> : <i className='far fa-star'></i>}
+          </Button>
         </Col>
       </Row>
       <Table bordered hover>
@@ -88,19 +113,28 @@ const HomeScreen = () => {
             <Message variant='danger'>{error}</Message>
           ) : (
             <>
-              {currBankList.map((bank) => (
-                <tr key={bank.ifsc}>
-                  <td>{bank.ifsc}</td>
-                  <td style={{ cursor: 'pointer' }}>
-                    <a href='!#'>{bank.bank_name}</a>
-                  </td>
-                  <td>{bank.branch}</td>
-                  <td>{bank.city}</td>
-                  <td>
-                    <i class='far fa-star'></i>
-                  </td>
-                </tr>
-              ))}
+              {currBankList.map((bank) => {
+                if ((fav && favourites.includes(bank.ifsc)) || !fav) {
+                  return (
+                    <tr key={bank.ifsc}>
+                      <td>{bank.ifsc}</td>
+                      <td style={{ cursor: 'pointer' }}>
+                        <a href='!#'>{bank.bank_name}</a>
+                      </td>
+                      <td>{bank.branch}</td>
+                      <td>{bank.city}</td>
+                      <td style={{ cursor: 'pointer' }} onClick={() => favMethod(bank.ifsc)}>
+                        {favourites.indexOf(bank.ifsc) > -1 ? (
+                          <i className='fas fa-star'></i>
+                        ) : (
+                          <i className='far fa-star'></i>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                }
+                return <></>;
+              })}
             </>
           )}
         </tbody>
