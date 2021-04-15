@@ -26,7 +26,7 @@ const HomeScreen = () => {
   const [currPage, setCurrPage] = useState(1);
   const [pageSize, setPageSize] = useState(100);
   const [currBankList, setCurrBankList] = useState([]);
-
+  const [filter, setFilter] = useState();
   const [fav, setFav] = useState(false);
 
   const dispatch = useDispatch();
@@ -52,20 +52,28 @@ const HomeScreen = () => {
 
   useEffect(() => {
     if (banks) {
+      let listOfBanks = banks;
       if (fav) {
-        const tempBanks = banks.filter((bank) => favourites.includes(bank.ifsc));
-        setNumPages(Math.ceil(tempBanks.length / pageSize));
-        const lastIndex = currPage * pageSize;
-        const firstIndex = (currPage - 1) * pageSize;
-        setCurrBankList(tempBanks.slice(firstIndex, lastIndex));
-      } else {
-        setNumPages(Math.ceil(banks.length / pageSize));
-        const lastIndex = currPage * pageSize;
-        const firstIndex = (currPage - 1) * pageSize;
-        setCurrBankList(banks.slice(firstIndex, lastIndex));
+        listOfBanks = banks.filter((bank) => favourites.includes(bank.ifsc));
       }
+      setNumPages(Math.ceil(listOfBanks.length / pageSize));
+
+      // Use Filter
+      if (filter) {
+        listOfBanks = listOfBanks.filter((bank) => {
+          if (bank.ifsc.toUpperCase().includes(filter.toUpperCase())) return true;
+          if (bank.bank_name.toUpperCase().includes(filter.toUpperCase())) return true;
+          if (bank.branch.toUpperCase().includes(filter.toUpperCase())) return true;
+          if (bank.city.toUpperCase().includes(filter.toUpperCase())) return true;
+          return false;
+        });
+      }
+
+      const lastIndex = currPage * pageSize;
+      const firstIndex = (currPage - 1) * pageSize;
+      setCurrBankList(listOfBanks.slice(firstIndex, lastIndex));
     }
-  }, [banks, currPage, pageSize, fav, favourites]);
+  }, [banks, currPage, pageSize, fav, favourites, filter]);
 
   const paginate = (pageNumber) => setCurrPage(pageNumber);
 
@@ -89,7 +97,11 @@ const HomeScreen = () => {
         </Col>
         <Col md={6}>
           <InputGroup>
-            <Form.Control placeholder='Search...' />
+            <Form.Control
+              placeholder='Search...'
+              value={filter}
+              onChange={(e) => setFilter(e.target.value)}
+            />
           </InputGroup>
         </Col>
         <Col md={2}>
