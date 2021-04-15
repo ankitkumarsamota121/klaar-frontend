@@ -18,19 +18,39 @@ const PaginationComp = ({ currPage, totalPages, paginate }) => {
   for (let i = start; i <= end; i++) pageNumbers.push(i);
 
   return (
-    <Pagination>
-      <Pagination.First onClick={() => paginate(1)} />
-      <Pagination.Ellipsis />
+    <>
+      {totalPages > 5 ? (
+        <Pagination>
+          <Pagination.First onClick={() => paginate(1)} />
+          <Pagination.Ellipsis />
 
-      {pageNumbers.map((number) => (
-        <Pagination.Item onClick={() => paginate(number)} active={number === currPage} key={number}>
-          {number}
-        </Pagination.Item>
-      ))}
+          {pageNumbers.map((number) => (
+            <Pagination.Item
+              onClick={() => paginate(number)}
+              active={number === currPage}
+              key={number}
+            >
+              {number}
+            </Pagination.Item>
+          ))}
 
-      <Pagination.Ellipsis />
-      <Pagination.Last onClick={() => paginate(totalPages)} />
-    </Pagination>
+          <Pagination.Ellipsis />
+          <Pagination.Last onClick={() => paginate(totalPages)} />
+        </Pagination>
+      ) : (
+        <Pagination>
+          {[...Array(totalPages).keys()].map((number) => (
+            <Pagination.Item
+              onClick={() => paginate(number + 1)}
+              active={number + 1 === currPage}
+              key={number}
+            >
+              {number + 1}
+            </Pagination.Item>
+          ))}
+        </Pagination>
+      )}
+    </>
   );
 };
 

@@ -5,16 +5,15 @@ import { composeWithDevTools } from 'redux-devtools-extension';
 
 import reducers from './reducers';
 
-const banksFromStorage = localStorage.getItem('banks')
-  ? JSON.parse(localStorage.getItem('banks'))
-  : {};
+// const banksFromStorage = localStorage.getItem('banks')
+//   ? JSON.parse(localStorage.getItem('banks'))
+//   : {};
 
 const favouritesFromStorate = localStorage.getItem('favourites')
   ? JSON.parse(localStorage.getItem('favourites'))
   : [];
 
 const initialState = {
-  banks: banksFromStorage,
   favourites: favouritesFromStorate,
 };
 const middlewares = [thunk];

@@ -27,7 +27,7 @@ const HomeScreen = () => {
   const [pageSize, setPageSize] = useState(100);
   const [currBankList, setCurrBankList] = useState([]);
 
-  const [fav, setFav] = useState(true);
+  const [fav, setFav] = useState(false);
 
   const dispatch = useDispatch();
   const bankList = useSelector((state) => state.bankList);
@@ -43,15 +43,29 @@ const HomeScreen = () => {
   useEffect(() => {
     if (banks) {
       setNumPages(Math.ceil(banks.length / pageSize));
-      const lastIndex = currPage * pageSize;
-      const firstIndex = (currPage - 1) * pageSize;
-      setCurrBankList(banks.slice(firstIndex, lastIndex));
     }
   }, [banks, currPage, pageSize]);
 
   useEffect(() => {
     setCurrPage(1);
   }, [numPages]);
+
+  useEffect(() => {
+    if (banks) {
+      if (fav) {
+        const tempBanks = banks.filter((bank) => favourites.includes(bank.ifsc));
+        setNumPages(Math.ceil(tempBanks.length / pageSize));
+        const lastIndex = currPage * pageSize;
+        const firstIndex = (currPage - 1) * pageSize;
+        setCurrBankList(tempBanks.slice(firstIndex, lastIndex));
+      } else {
+        setNumPages(Math.ceil(banks.length / pageSize));
+        const lastIndex = currPage * pageSize;
+        const firstIndex = (currPage - 1) * pageSize;
+        setCurrBankList(banks.slice(firstIndex, lastIndex));
+      }
+    }
+  }, [banks, currPage, pageSize, fav, favourites]);
 
   const paginate = (pageNumber) => setCurrPage(pageNumber);
 
@@ -67,13 +81,7 @@ const HomeScreen = () => {
     <>
       <Row className='align-items-center mb-3'>
         <Col md={4}>
-          <Form.Control
-            className='pr-1'
-            as='select'
-            placeholder='Select City'
-            value={city}
-            onChange={(e) => setCity(e.target.value)}
-          >
+          <Form.Control as='select' value={city} onChange={(e) => setCity(e.target.value)}>
             {cities.map((c) => (
               <option key={c}>{c}</option>
             ))}
@@ -81,7 +89,7 @@ const HomeScreen = () => {
         </Col>
         <Col md={6}>
           <InputGroup>
-            <Form.Control aria-label='Search' placeholder='Search...' />
+            <Form.Control placeholder='Search...' />
           </InputGroup>
         </Col>
         <Col md={2}>
@@ -95,75 +103,86 @@ const HomeScreen = () => {
           </Button>
         </Col>
       </Row>
-      <Table bordered hover>
-        <thead>
-          <tr>
-            <th>IFSC</th>
-            <th>Bank Name</th>
-            <th>Branch Name</th>
-            <th>City</th>
-            <th></th>
-          </tr>
-        </thead>
-        {/* Table Body gets filled here */}
-        <tbody>
-          {loading ? (
-            <Loader />
-          ) : error ? (
-            <Message variant='danger'>{error}</Message>
-          ) : (
-            <>
-              {currBankList.map((bank) => {
-                if ((fav && favourites.includes(bank.ifsc)) || !fav) {
-                  return (
-                    <tr key={bank.ifsc}>
-                      <td>{bank.ifsc}</td>
-                      <td style={{ cursor: 'pointer' }}>
-                        <a href='!#'>{bank.bank_name}</a>
-                      </td>
-                      <td>{bank.branch}</td>
-                      <td>{bank.city}</td>
-                      <td style={{ cursor: 'pointer' }} onClick={() => favMethod(bank.ifsc)}>
-                        {favourites.indexOf(bank.ifsc) > -1 ? (
-                          <i className='fas fa-star'></i>
-                        ) : (
-                          <i className='far fa-star'></i>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                }
-                return <></>;
-              })}
-            </>
-          )}
-        </tbody>
-      </Table>
 
-      {numPages > 1 && (
-        <Row>
-          <Col sm={9}>
-            <PaginationComp currPage={currPage} totalPages={numPages} paginate={paginate} />
-          </Col>
-          <Col sm={3}>
-            <Row className='align-items-center'>
-              <Col sm='auto'>Page Size: </Col>
-              <Col>
-                <Form.Control
-                  className='pr-1'
-                  as='select'
-                  value={pageSize}
-                  onChange={(e) => setPageSize(e.target.value)}
-                >
-                  {sizes.map((c) => (
-                    <option key={c}>{c}</option>
-                  ))}
-                </Form.Control>
-              </Col>
-            </Row>
-          </Col>
-        </Row>
-      )}
+      {/* TABLE */}
+      <Row style={{ minHeight: '80vh' }}>
+        <Table bordered hover>
+          <thead>
+            <tr>
+              <th>IFSC</th>
+              <th>Bank Name</th>
+              <th>Branch Name</th>
+              <th>City</th>
+              <th></th>
+            </tr>
+          </thead>
+          {/* Table Body gets filled here */}
+          <tbody>
+            {loading ? (
+              <tr>
+                <td className='align-items-center' colSpan='5'>
+                  <Loader />
+                </td>
+              </tr>
+            ) : error ? (
+              <tr>
+                <td className='align-items-center' colSpan='5'>
+                  <Message variant='danger'>{error}</Message>
+                </td>
+              </tr>
+            ) : (
+              <>
+                {currBankList.map((bank) => {
+                  if ((fav && favourites.includes(bank.ifsc)) || !fav) {
+                    return (
+                      <tr key={bank.ifsc}>
+                        <td>{bank.ifsc}</td>
+                        <td style={{ cursor: 'pointer' }}>
+                          <a href='!#'>{bank.bank_name}</a>
+                        </td>
+                        <td>{bank.branch}</td>
+                        <td>{bank.city}</td>
+                        <td style={{ cursor: 'pointer' }} onClick={() => favMethod(bank.ifsc)}>
+                          {favourites.indexOf(bank.ifsc) > -1 ? (
+                            <i className='fas fa-star'></i>
+                          ) : (
+                            <i className='far fa-star'></i>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  }
+                  return <></>;
+                })}
+              </>
+            )}
+          </tbody>
+        </Table>
+      </Row>
+
+      {/* PAGINATION */}
+      <Row>
+        <Col sm={9}>
+          <PaginationComp currPage={currPage} totalPages={numPages} paginate={paginate} />
+        </Col>
+        <Col sm={3}>
+          <Row className='align-items-center'>
+            <Col sm='auto'>Page Size: </Col>
+            <Col>
+              <Form.Control
+                className='pr-1'
+                as='select'
+                value={pageSize}
+                onChange={(e) => setPageSize(e.target.value)}
+              >
+                {sizes.map((c) => (
+                  <option key={c}>{c}</option>
+                ))}
+              </Form.Control>
+            </Col>
+          </Row>
+        </Col>
+      </Row>
     </>
   );
 };
