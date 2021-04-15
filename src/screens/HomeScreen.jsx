@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { listBanks } from '../actions/bankActions';
-import { Form, Row, Col, InputGroup, Table } from 'react-bootstrap';
+import { Form, Row, Col, InputGroup, Table, Pagination } from 'react-bootstrap';
 import Loader from '../components/Loader';
 import Message from '../components/Message';
 const cities = ['Select City', 'Bangalore', 'Mumbai', 'Kolkata', 'Jaipur', 'Delhi'];
@@ -17,6 +17,7 @@ const citiesMap = {
 
 const HomeScreen = () => {
   const [city, setCity] = useState('');
+  const [numPages, setNumPages] = useState(1);
 
   const dispatch = useDispatch();
   const bankList = useSelector((state) => state.bankList);
@@ -25,6 +26,12 @@ const HomeScreen = () => {
   useEffect(() => {
     dispatch(listBanks(citiesMap[city]));
   }, [dispatch, city]);
+
+  useEffect(() => {
+    if (banks) {
+      setNumPages(Math.ceil(banks.length / 100));
+    }
+  }, [banks]);
 
   return (
     <>
@@ -67,7 +74,7 @@ const HomeScreen = () => {
           ) : (
             <>
               {banks.map((bank) => (
-                <tr>
+                <tr key={bank.ifsc}>
                   <td>{bank.ifsc}</td>
                   <td>{bank.bank_name}</td>
                   <td>{bank.branch}</td>
@@ -81,6 +88,28 @@ const HomeScreen = () => {
           )}
         </tbody>
       </Table>
+
+      {numPages > 1 && (
+        <Row>
+          <Pagination>
+            <Pagination.First />
+            <Pagination.Prev />
+            <Pagination.Item>{1}</Pagination.Item>
+            <Pagination.Ellipsis />
+
+            <Pagination.Item>{10}</Pagination.Item>
+            <Pagination.Item>{11}</Pagination.Item>
+            <Pagination.Item active>{12}</Pagination.Item>
+            <Pagination.Item>{13}</Pagination.Item>
+            <Pagination.Item disabled>{14}</Pagination.Item>
+
+            <Pagination.Ellipsis />
+            <Pagination.Item>{20}</Pagination.Item>
+            <Pagination.Next />
+            <Pagination.Last />
+          </Pagination>
+        </Row>
+      )}
     </>
   );
 };
