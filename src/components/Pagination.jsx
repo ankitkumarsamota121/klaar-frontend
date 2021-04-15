@@ -37,7 +37,7 @@ const PaginationComp = ({ currPage, totalPages, paginate }) => {
           <Pagination.Ellipsis />
           <Pagination.Last onClick={() => paginate(totalPages)} />
         </Pagination>
-      ) : (
+      ) :  (
         <Pagination>
           {[...Array(totalPages).keys()].map((number) => (
             <Pagination.Item
@@ -49,7 +49,7 @@ const PaginationComp = ({ currPage, totalPages, paginate }) => {
             </Pagination.Item>
           ))}
         </Pagination>
-      )}
+      ) }
     </>
   );
 };

@@ -1,4 +1,4 @@
-import { ADD_FAVOURITE, REMOVE_FAVOURITE } from '../constants/types';
+import { ADD_FAVOURITE, REMOVE_FAVOURITE, BANK_DETAILS } from '../constants/types';
 
 export const addFavourite = (ifsc) => async (dispatch, getState) => {
   try {
@@ -22,6 +22,14 @@ export const removeFavourite = (ifsc) => async (dispatch, getState) => {
     }
     localStorage.setItem('favourites', JSON.stringify(favourites));
     dispatch({ type: REMOVE_FAVOURITE, payload: favourites });
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+export const showBankDetails = (bankDetails) => async (dispatch, getState) => {
+  try {
+    dispatch({ type: BANK_DETAILS, payload: bankDetails });
   } catch (error) {
     console.log(error);
   }
