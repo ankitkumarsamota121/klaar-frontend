@@ -56,7 +56,6 @@ const HomeScreen = () => {
       if (fav) {
         listOfBanks = banks.filter((bank) => favourites.includes(bank.ifsc));
       }
-      setNumPages(Math.ceil(listOfBanks.length / pageSize));
 
       // Use Filter
       if (filter) {
@@ -69,6 +68,7 @@ const HomeScreen = () => {
         });
       }
 
+      setNumPages(Math.ceil(listOfBanks.length / pageSize));
       const lastIndex = currPage * pageSize;
       const firstIndex = (currPage - 1) * pageSize;
       setCurrBankList(listOfBanks.slice(firstIndex, lastIndex));
